@@ -1,0 +1,197 @@
+/* CMPT 332
+* Assignment 4
+* Group 38
+* Tanner Laroque, YJE740, 11122821
+* Melvin Lugo, 11279686, mel196
+*/
+=============>>> FOR MARKER <<<=============
+
+WRITTEN REPORT, MORE DETAILED DATA RESULTS IN THE PROVIDED CSV IF YOU WANT
+
+=============>>> FOR MARKER <<<=============
+
+From the results provided focusing on runs 2 and 3 first, the number of frames 
+available in memory directly correlates to the pagefault rate. The fewer 
+frames there are, the more page faults that occur. This isn’t new, but it’s 
+interesting to see that the clock algorithm performs better when there are 
+enough frames in memory.
+
+Please look at pdf A2.ExperimentReportGraphs.pdf to see the results i'll be
+talking about in a moment.
+
+====>look at 2nd Run graphs in the pdf<====
+
+As you can see there are not a lot of frames available to the 5 threads 
+that want to do their work, so the number of page faults that occur is 
+high. Below you will see the results of the same run but with 10 frames 
+instead of 2.
+
+====>look at 3rd Run graphs in the pdf<====
+
+Again this is to be expected, but it’s interesting to see that in this 
+scenario that the page fault rate for the clock algorithm is 6% lower 
+than that of the second chance. Lets look at another example, where 
+below are the results of a larger run. 
+
+====>look at 4th Run graphs in the pdf<====
+
+You can see again that the clock algorithm is performing better than 
+the second chance algorithm, albeit by not a large margin, but still 
+better. These results are seen repeatedly which leads me to believe that
+the clock algorithm is better in these cases, than the seconed chance algo.
+
+
+=============>>> FOR MARKER <<<=============
+
+THIS IS TO SHOW THAT THE CODE WORKS
+(using very small values to make the output readable)
+
+=============>>> FOR MARKER <<<=============
+
+2 Threads (NUM_THREADS)
+2 Frames (NUM_FRAMES)
+5 Simulation Loops (NUM SIMULATION)
+32 Random Seed (SRAND)
+20 Number of pages per thread (NUM_PAGES)
+
+Setting up Monitor and counting semaphore
+Setting up thread attributes
+Setting up physical memory
+Setting up page table
+Generating reference string
+Setting up page table
+Generating reference string
+Creating threads
+Parent waiting
+server made
+Process 4099 is in its own thread
+Process 4099 writing
+Process 4099 writing PAGEFAULT
+Process 4099 found a free spot in mem
+Process 4099 done pagefault
+Process 4099 sleeping after read or write
+Process 4100 is in its own thread
+Process 4100 writing
+Process 4100 writing PAGEFAULT
+Process 4100 found a free spot in mem
+Process 4100 done pagefault
+Process 4100 sleeping after read or write
+Process 4099 woke up!
+Process 4099 writing
+Process 4099 writing VALID_BIT
+Process 4099 sleeping after read or write
+Process 4100 woke up!
+Process 4100 reading
+starting value of numReaders = 1
+Process 4100 reading VALID_BIT
+stopping value of numReaders = 0
+Process 4100 sleeping after read or write
+Process 4099 woke up!
+Process 4099 reading
+starting value of numReaders = 1
+Process 4099 reading VALID_BIT
+stopping value of numReaders = 0
+Process 4099 sleeping after read or write
+Process 4100 woke up!
+Process 4100 writing
+Process 4100 writing VALID_BIT
+Process 4100 sleeping after read or write
+Process 4099 woke up!
+Process 4099 reading
+starting value of numReaders = 1
+Process 4099 reading PAGEFAULT
+Process 4099 no free spot found, using algo
+Process 4099 using SecondChanceAlgo
+Resetting clock hand
+Resetting clock hand
+SecondChance algo found a free spot
+Done replacing
+Process 4099 done pagefault
+stopping value of numReaders = 0
+Process 4099 sleeping after read or write
+Process 4100 woke up!
+Process 4100 reading
+starting value of numReaders = 1
+Process 4100 reading PAGEFAULT
+Process 4100 no free spot found, using algo
+Process 4100 using ClockAlgo
+Clock algo found a free spot
+Done replacing
+Process 4100 done pagefault
+stopping value of numReaders = 0
+Process 4100 sleeping after read or write
+Process 4100 woke up!
+Process 4100 writing
+Process 4100 writing PAGEFAULT
+Process 4100 no free spot found, using algo
+Process 4100 using ClockAlgo
+Resetting clock hand
+Clock algo found a free spot
+Done replacing
+Process 4100 done pagefault
+Process 4100 sleeping after read or write
+Process 4099 woke up!
+Process 4099 writing
+Process 4099 writing PAGEFAULT
+Process 4099 no free spot found, using algo
+Process 4099 using SecondChanceAlgo
+SecondChance algo found a free spot
+Done replacing
+Process 4099 done pagefault
+Process 4099 sleeping after read or write
+Process 4100 woke up!
+Process 4100 finished doing tasks.
+Process 4099 woke up!
+Process 4099 finished doing tasks.
+ALL PROCESSES DONE!
+Process 4099 stats:
+-ALGO: SecondChance
+  -TOTALS: Process 4099
+    -Total process exectuion time: 0.026696
+    -Total pagefault time: 0.000083
+    -Total read time: 0.000105
+    -Total write time: 0.000108
+    -Total number of reads: 2
+    -Total number of writes: 3
+    -Total number of pagefaults: 3
+Process 4100 stats:
+-ALGO: Clock
+  -TOTALS: Process 4100
+    -Total process exectuion time: 0.026650
+    -Total pagefault time: 0.000075
+    -Total read time: 0.000100
+    -Total write time: 0.000109
+    -Total number of reads: 2
+    -Total number of writes: 3
+    -Total number of pagefaults: 3
+-ALGO: Clock
+  -TOTALS:
+    -Total execution time: 0.026650
+    -Total pagefault time: 0.000075
+    -Total read time: 0.000100
+    -Total write time: 0.000109
+    -Total pagefaults: 3
+    -Total memory accesses: 5
+    -Pagefault rate: 0.600000
+-ALGO: SecondChance
+  -TOTALS:
+    -Total execution time: 0.000000
+    -Total pagefault time: 0.000083
+    -Total read time: 0.000105
+    -Total write time: 0.000108
+    -Total pagefaults: 3
+    -Total memory accesses: 5
+    -Pagefault rate: 0.600000
+-ALGO: Clock
+  -AVERAGES:
+    -Average execution time: 0.026650
+    -Average pagefault time: 0.000075
+    -Average read time: 0.000100
+    -Average write time: 0.000109
+-ALGO: SecondChance
+  -AVERAGES:
+    -Average execution time: 0.000000
+    -Average pagefault time: 0.000083
+    -Average read time: 0.000105
+    -Average write time: 0.000108
+

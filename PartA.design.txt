@@ -1,0 +1,186 @@
+/* CMPT 332
+* Assignment 4
+* Group 38
+* Tanner Laroque, YJE740, 11122821
+* Melvin Lugo, 11279686, mel196
+*/
+
+
+Mainp():
+    - Parameters:
+        - None
+    - Varaibles of Note:
+        - Sets up the variables for calculating average compute times when
+        doing read/write tasks and how long a process took to run. Also sets
+        up all variables for the structs in A1.h discussed later.
+    
+    -Description:
+        - sets up the monitor and counting semaphore to have the parent 
+wait for the child threads that are created.
+        - sets up the thread attributes
+        - sets up the phyusical memory attributes/frames
+        - sets up the processes to be run on the threads and their page tables
+        - Generates the reference string using GenerateVirtualAddress() for the
+        processes
+        - reports the results of the runs at the end.
+    
+ProcessSimulation():
+    - Parameters:
+        - void * arg: pointer to the process that will be simulated
+    
+    - Description:
+        does the main work of the simulation. starts the execution timer for
+        the process, then iterates over NUM_SIMULATIONS which is supposed to be
+        process->reference_string_length but that made the work take too long.
+        Each iteration determines if the ReferenceStringEntry for the process
+        is a READ or WRITE operation, then has them enter the monitor with
+        StartRead()/StartWrite(). after that the process does their work, and
+        exits the monitor with StopRead()/StopWrite(). The process then goes
+        to sleep for a random amount of time and repeats.
+
+WriteMemory():
+    - Parameters:
+        - Process *process: pointer to the process calling it
+        - ReferenceStringEntry *virtual_address: pointer to the virtual_address
+        of the process
+    
+    - Description:
+        first it calculates the target page from the virtual_address and gets
+        the page_table_entry from the process with the result. Next, it checks
+        if the page is in memory by checking its valid_bit and if it is then
+        it updates the page table entry and the associated physical_mem_frame.
+        It then updates the reference_bit and modify_bit for the 
+        page_table_entry and in the physical_mem_frame. if the page isn't in
+        physical memory then it calls a pagefault.
+
+ReadMemory():
+    - Parameters:
+        - Process *process: pointer to the process calling it
+        - ReferenceStringEntry *virtual_address: pointer to the virtual_address
+        of the process
+    
+    - Description:
+        Exact same as WriteMemory() except it doesn't update the modify_bit if
+        the page_table_entry is in physical memory.
+
+Pagefault():
+    - Parameters:
+        - Process *process: pointer to the process calling it
+        - int page_number: the page in the memory frame
+        - int operation_type: READ or WRITE operation
+    
+    - Description:
+        First tries to find a free frame in the physical memory, and if there
+        is one then that frame is marked as occupied and its meta data is 
+        updated. the page_table_entry for the process's page in the page 
+        table is also updated, but if the operation is a WRITE type then its 
+        modify_bit is updated to 1, otherwise it's 0. If no free spot is found
+        then either the Clock algo or Second Chance algo will be used to find
+        a victim page in memory. when a victim page is found then the above
+        occurs, but also the victim page is removed from memory.
+
+SecondChanceAlgo():
+    - Parameters:
+        - None
+    
+    - Description;
+        - loops over all the frames in memory and if a frame's reference_bit is
+        0 and the modify_bit is also 0, then it chooses that as the victim. 
+        otherwise if the reference_bit is 0 and the modify_bit is 1, then it
+        sets the modify_bit to 0 and increaases the clock hand. the clock hand
+        is used to loop back to the start of the memory frames. if the above
+        are false then it marks the frame's reference_bit to 0 and increaases
+        the clock hand.
+
+ClockAlgo():
+    - Parameters:
+        - None
+    
+    - Description;
+        Exact same as second chance except only checks the reference bit.
+
+GenerateVirtualAddress():
+    - Parameters:
+        - Process *process: pointer to the process calling it
+    
+    - Description:
+        first it divides the pages into segments where 75% go to the code
+        and 25% go to the data. it then randomly chooses which segment to use.
+        depending on the choice it sets the appropriate start and end boundary
+        for the zipf exponent, and that too gets chosen but not randomly. 
+        after that memory is allocated for the rank probabilities and the 
+        normalization constant is calculated using 1/index^zipf_exponent. using
+        the for loop, it calculates cumulative probabilities so that the lower
+        ranked pages have a higher probability of being chosen. then, another
+        random numer is generated and used to determine which page within the
+        chosen segment is selected. this makes sure that some pages are more
+        likely to be chosen over others. once the page is chosen, a 
+random offset
+        within the pagesize is chosen to create the virtual_address.
+
+RandomRange():
+    - Parameters:
+        - int min: lower end of the range
+        - int max: higher end of the range
+    
+    - Description;
+        returns a random number between min and max
+
+    - DISCLAIMER:
+        I got this code from a stack overflow answer!
+https://stackoverflow.com/questions/1202687/
+how-do-i-get-a-specific-range-of-numbers-from-rand
+    
+
+GetPageNumber():
+    - Parameters:
+        - int virtual_address: the virtual_address
+    
+    - Description:
+        gets the page number by dividing the virtual_address by the PAGE_SIZE.
+
+
+A1.h
+    Struct Process:
+        - RttThreadId thread_id: the thread id
+        - PageTableEntry *page_table: an array of pages
+        - ReferenceStringEntry *reference_string: the reference string
+        - int reference_string_length: length of the reference_string
+        - int page_fault_count: keeps track of the number of times a page fault
+        happens
+        - int num_reads: number of reads that occur
+        - int num_writes: number of writes that occur
+        - int num_pages: holds the number of pages in the page table
+        - int clock_or_second: determines if the thread will use the clock or
+        second chance algo
+        - int total_mem_accesses: keeps track of the number of times memory
+        is accessed
+        - double total_page_fault_time: keeps track of the total time in a 
+        page fault situation
+        - double total_read_time: keeps track of the total read time
+        - double total_write_time: keeps track of the total write time
+        - double total_execution_time: keeps track of how long the process has
+        been running
+
+    Struct PhysicalMemFrame:
+        - int frame_number: Physical frame number
+        - Process *occupied_by: Pointer to the owning process
+        - int is_occupied: Is occupied or not 1 yes, 0 no
+        - int reference_bit: Used by the algos
+        - int modify_bit: 1 if the page has been modified
+        - int page_number: Virtual page number stored in this frame
+
+    Struct ReferenceStringEntry:
+        int operation_type: 1 for write, 0 for read 
+        unsigned int virtual_address: Virtual address being accessed
+    
+    Struct PageTableEntry:
+        int frame_number: Physical frame number 
+        int valid_bit: 1 if the page is in physical memory, 0 otherwise 
+        int reference_bit: lets everything know if the page has been accessed
+        int modify_bit: used in the second chance algo and acts like a 3rd
+        chance
+
+Descriptions for the monitor code is absent because they're old and already
+explained in A2
+
